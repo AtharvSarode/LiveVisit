@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" style="height: 50%;width:50%"></div>
+    <div id="position"></div>
+    <form method="post">
+      <input type="email" placeholder="enter valid mail id" id="form">
+    </form>
+    <script>
+      var map;
+      function initMap() {
+        
+        var myLatlng = {lat: 21.128611545070104, lng: 79.05619636930845};
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: myLatlng,
+          zoom: 15
+        });
+
+    let infoWindow = new google.maps.InfoWindow({
+    content: "Click the map to get Lat/Lng!",
+    position: myLatlng,
+  });
+
+  infoWindow.open(map);
+        
+    map.addListener("click", (mapsMouseEvent) => {
+    // Close the current InfoWindow.
+    infoWindow.close();
+
+    // Create a new InfoWindow.
+    myLatlng= mapsMouseEvent.latLng.toJSON();
+    document.getElementById('position').innerHTML="position:"+JSON.stringify(myLatlng);
+    let mail=document.getElementById("form").value
+    console.log(mail);
+    fetch('/addReq',{
+        method:"POST",
+        headers: {"Content-type": "application/json;charset=UTF-8"},
+        body:JSON.stringify({'location':myLatlng,'mail':mail})
+    })
+    .then((d)=>d.json())
+    .then((data)=>console.log(data))
+    .catch((err)=>console.log(err));
+    
+    infoWindow = new google.maps.InfoWindow({
+        content: "Click the map to get Lat/Lng!",
+    position: myLatlng,
+    });
+    infoWindow.setContent(
+      JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2)
+    );
+    infoWindow.open(map);
+
+    
+  });
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBDOrJrUg7R4hMZ0UkNW-i2I_z7iVKOQVs&callback=initMap"
+    async defer></script>
+  </body>
+</html>
